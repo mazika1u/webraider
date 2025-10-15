@@ -30,7 +30,7 @@
       border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6),
                   0 0 0 1px rgba(255, 107, 107, 0.1);
-      width: 100%; max-width: 700px;
+      width: 100%; max-width: 800px;
       animation: fadeIn 1s ease;
       overflow: auto; max-height: 95vh;
       backdrop-filter: blur(10px);
@@ -261,6 +261,45 @@
       font-weight: 600;
     }
 
+    /* 言語オプション */
+    .language-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .language-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(50, 50, 50, 0.5);
+      border-radius: 8px;
+      border: 1px solid #444;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .language-option:hover {
+      background: rgba(60, 60, 60, 0.7);
+      border-color: #666;
+    }
+    
+    .language-option.selected {
+      background: rgba(255, 107, 107, 0.2);
+      border-color: #ff6b6b;
+    }
+    
+    .language-option input {
+      margin: 0;
+    }
+    
+    .language-option span {
+      font-size: 14px;
+      color: #ddd;
+    }
+
     /* ボタン */
     button.primary {
       margin-top: 25px; width: 100%; padding: 16px;
@@ -303,6 +342,22 @@
       transform: translateY(-1px);
     }
 
+    /* 自動投票ボタン */
+    #autoVoteBtn {
+      background: linear-gradient(135deg, #4cd964, #44a857);
+      color: #fff; font-weight: 700; font-size: 14px;
+      border: none; border-radius: 10px; padding: 12px;
+      cursor: pointer; transition: all 0.3s;
+      margin-top: 15px;
+      box-shadow: 0 4px 12px rgba(76, 217, 100, 0.4);
+    }
+    
+    #autoVoteBtn:hover {
+      background: linear-gradient(135deg, #3dc953, #38974a);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(76, 217, 100, 0.6);
+    }
+
     /* 停止・退出ボタン強調 */
     #stopSpam, #leaveBtn {
       width: 48%; padding: 12px;
@@ -328,6 +383,7 @@
       display: flex;
       gap: 12px;
       justify-content: center;
+      flex-wrap: wrap;
     }
 
     /* Advanced options (details) */
@@ -429,6 +485,10 @@
       #stopSpam, #leaveBtn { width: 100%; }
       
       input[type="number"] { width: 100%; }
+      
+      .language-options {
+        grid-template-columns: 1fr;
+      }
     }
 
     small { 
@@ -444,6 +504,40 @@
       font-size: 12px;
       margin-top: 3px;
       font-family: 'Courier New', monospace;
+    }
+
+    /* メッセージ入力オプション */
+    .message-options {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .message-option-btn {
+      flex: 1;
+      padding: 10px;
+      background: rgba(50, 50, 50, 0.5);
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: #ddd;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .message-option-btn.active {
+      background: rgba(255, 107, 107, 0.2);
+      border-color: #ff6b6b;
+      color: #ff6b6b;
+    }
+    
+    .message-input-container {
+      display: none;
+    }
+    
+    .message-input-container.active {
+      display: block;
     }
   </style>
 </head>
@@ -486,16 +580,33 @@
           <span>メッセージ設定</span>
         </div>
         
-        <label>メッセージファイル</label>
-        <div class="file-input-container">
-          <input type="file" id="messageFile" accept=".txt" required>
-          <label for="messageFile" class="file-input-label" id="fileInputLabel">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <span>クリックしてテキストファイルを選択</span>
-          </label>
+        <!-- メッセージ入力オプション -->
+        <div class="message-options">
+          <button type="button" class="message-option-btn active" data-option="file">ファイル入力</button>
+          <button type="button" class="message-option-btn" data-option="text">テキスト入力</button>
         </div>
-        <div class="file-name" id="fileName">ファイルが選択されていません</div>
-        <small>選択したテキストファイルの内容全体が1つのメッセージとして送信されます</small>
+
+        <!-- ファイル入力 -->
+        <div class="message-input-container active" id="fileInputContainer">
+          <label>メッセージファイル</label>
+          <div class="file-input-container">
+            <input type="file" id="messageFile" accept=".txt">
+            <label for="messageFile" class="file-input-label" id="fileInputLabel">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>クリックしてテキストファイルを選択</span>
+            </label>
+          </div>
+          <div class="file-name" id="fileName">ファイルが選択されていません</div>
+          <small>選択したテキストファイルの内容全体が1つのメッセージとして送信されます</small>
+        </div>
+
+        <!-- テキスト入力 -->
+        <div class="message-input-container" id="textInputContainer">
+          <label>メッセージテキスト
+            <textarea id="messageText" rows="4" placeholder="送信するメッセージを直接入力してください"></textarea>
+          </label>
+          <small>直接入力したテキストがメッセージとして送信されます</small>
+        </div>
 
         <label class="checkbox-container">
           <input type="checkbox" id="allmention" checked>
@@ -506,6 +617,28 @@
           <input type="checkbox" id="randomize">
           <span>メッセージをランダマイズ（UUID追加）</span>
         </label>
+
+        <!-- 言語オプション -->
+        <label>ランダム言語テキスト追加</label>
+        <div class="language-options">
+          <label class="language-option" id="arabicOption">
+            <input type="checkbox" id="addArabic">
+            <span>アラビア語</span>
+          </label>
+          <label class="language-option" id="japaneseOption">
+            <input type="checkbox" id="addJapanese">
+            <span>日本語</span>
+          </label>
+          <label class="language-option" id="koreanOption">
+            <input type="checkbox" id="addKorean">
+            <span>韓国語</span>
+          </label>
+          <label class="language-option" id="chineseOption">
+            <input type="checkbox" id="addChinese">
+            <span>中国語</span>
+          </label>
+        </div>
+        <small>チェックした言語のランダムテキストがメッセージに追加されます</small>
         
         <div class="row">
           <label>送信間隔
@@ -540,6 +673,16 @@
             <textarea id="pollAnswers" rows="2" placeholder="選択肢をカンマ、改行、またはスペースで区切って入力"></textarea>
             <div class="example">例: 選択肢1, 選択肢2, 選択肢3</div>
           </label>
+          
+          <!-- 自動投票オプション -->
+          <label class="checkbox-container">
+            <input type="checkbox" id="autoVote">
+            <span>投票作成後に自動投票（一番上の選択肢）</span>
+          </label>
+          
+          <label>自動投票までの遅延
+            <input type="number" id="voteDelay" min="1" step="1" value="2" placeholder="2"> 秒
+          </label>
         </div>
       </details>
 
@@ -549,6 +692,9 @@
     </form>
     
     <div class="button-container">
+      <button id="autoVoteBtn" class="secondary">
+        <i class="fas fa-vote-yea"></i> 自動投票（既存の投票）
+      </button>
       <button id="stopSpam" class="secondary" disabled>
         <i class="fas fa-stop"></i> 送信停止
       </button>
@@ -577,6 +723,48 @@
         label.classList.remove('has-file');
         nameDisplay.style.color = '#ff6b6b';
       }
+    });
+
+    // 言語オプションのUI改善
+    const languageOptions = document.querySelectorAll('.language-option');
+    languageOptions.forEach(option => {
+      option.addEventListener('click', function(e) {
+        if (e.target.type !== 'checkbox') {
+          const checkbox = this.querySelector('input[type="checkbox"]');
+          checkbox.checked = !checkbox.checked;
+          this.classList.toggle('selected', checkbox.checked);
+        } else {
+          this.classList.toggle('selected', e.target.checked);
+        }
+      });
+    });
+
+    // メッセージ入力オプションの切り替え
+    const messageOptionBtns = document.querySelectorAll('.message-option-btn');
+    const fileInputContainer = document.getElementById('fileInputContainer');
+    const textInputContainer = document.getElementById('textInputContainer');
+    
+    messageOptionBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const option = this.getAttribute('data-option');
+        
+        // ボタンのアクティブ状態を更新
+        messageOptionBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // コンテナの表示を切り替え
+        fileInputContainer.classList.remove('active');
+        textInputContainer.classList.remove('active');
+        
+        if (option === 'file') {
+          fileInputContainer.classList.add('active');
+        } else {
+          textInputContainer.classList.add('active');
+        }
+        
+        // フォームのバリデーションを更新
+        checkFormValidity();
+      });
     });
   </script>
 </body>
