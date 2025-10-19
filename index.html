@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* スクロールバーのスタイル */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #1a1b1e; border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #ff6b6b, #ee5a24); border-radius: 4px; }
@@ -116,7 +115,6 @@
       margin-top: 0;
     }
 
-    /* テキスト入力 */
     input[type="text"], textarea {
       width: 100%; padding: 12px; margin-top: 8px;
       border-radius: 10px; border: 1px solid #444;
@@ -153,7 +151,6 @@
       -webkit-appearance: none; margin: 0;
     }
 
-    /* ファイル入力のカスタムデザイン */
     .file-input-container {
       position: relative;
       margin-top: 8px;
@@ -206,7 +203,6 @@
       text-align: center;
     }
 
-    /* フレックス行 */
     .row {
       display: flex; gap: 15px; align-items: center;
       flex-wrap: wrap;
@@ -216,7 +212,6 @@
     .row label,
     .row .checkbox-container { margin-top: 0; }
 
-    /* トグルスイッチ */
     .checkbox-container {
       display: flex; align-items: center; gap: 10px;
       cursor: pointer; font-size: 14px; user-select: none;
@@ -261,7 +256,6 @@
       font-weight: 600;
     }
 
-    /* 言語オプション */
     .language-options {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -300,7 +294,6 @@
       color: #ddd;
     }
 
-    /* ボタン */
     button.primary {
       margin-top: 25px; width: 100%; padding: 16px;
       border: none; border-radius: 12px;
@@ -342,23 +335,6 @@
       transform: translateY(-1px);
     }
 
-    /* 自動投票ボタン */
-    #autoVoteBtn {
-      background: linear-gradient(135deg, #4cd964, #44a857);
-      color: #fff; font-weight: 700; font-size: 14px;
-      border: none; border-radius: 10px; padding: 12px;
-      cursor: pointer; transition: all 0.3s;
-      margin-top: 15px;
-      box-shadow: 0 4px 12px rgba(76, 217, 100, 0.4);
-    }
-    
-    #autoVoteBtn:hover {
-      background: linear-gradient(135deg, #3dc953, #38974a);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(76, 217, 100, 0.6);
-    }
-
-    /* 停止・退出ボタン強調 */
     #stopSpam, #leaveBtn {
       width: 48%; padding: 12px;
       border: none; border-radius: 10px;
@@ -386,7 +362,6 @@
       flex-wrap: wrap;
     }
 
-    /* Advanced options (details) */
     details { 
       margin-top: 20px; 
       background: rgba(40, 40, 40, 0.5);
@@ -506,7 +481,6 @@
       font-family: 'Courier New', monospace;
     }
 
-    /* メッセージ入力オプション */
     .message-options {
       display: flex;
       gap: 10px;
@@ -580,13 +554,11 @@
           <span>メッセージ設定</span>
         </div>
         
-        <!-- メッセージ入力オプション -->
         <div class="message-options">
           <button type="button" class="message-option-btn active" data-option="file">ファイル入力</button>
           <button type="button" class="message-option-btn" data-option="text">テキスト入力</button>
         </div>
 
-        <!-- ファイル入力 -->
         <div class="message-input-container active" id="fileInputContainer">
           <label>メッセージファイル</label>
           <div class="file-input-container">
@@ -600,7 +572,6 @@
           <small>選択したテキストファイルの内容全体が1つのメッセージとして送信されます</small>
         </div>
 
-        <!-- テキスト入力 -->
         <div class="message-input-container" id="textInputContainer">
           <label>メッセージテキスト
             <textarea id="messageText" rows="4" placeholder="送信するメッセージを直接入力してください"></textarea>
@@ -618,7 +589,6 @@
           <span>メッセージをランダマイズ（UUID追加）</span>
         </label>
 
-        <!-- 言語オプション -->
         <label>ランダム言語テキスト追加</label>
         <div class="language-options">
           <label class="language-option" id="arabicOption">
@@ -673,16 +643,6 @@
             <textarea id="pollAnswers" rows="2" placeholder="選択肢をカンマ、改行、またはスペースで区切って入力"></textarea>
             <div class="example">例: 選択肢1, 選択肢2, 選択肢3</div>
           </label>
-          
-          <!-- 自動投票オプション -->
-          <label class="checkbox-container">
-            <input type="checkbox" id="autoVote">
-            <span>投票作成後に自動投票（一番上の選択肢）</span>
-          </label>
-          
-          <label>自動投票までの遅延
-            <input type="number" id="voteDelay" min="1" step="1" value="2" placeholder="2"> 秒
-          </label>
         </div>
       </details>
 
@@ -692,9 +652,6 @@
     </form>
     
     <div class="button-container">
-      <button id="autoVoteBtn" class="secondary">
-        <i class="fas fa-vote-yea"></i> 自動投票（既存の投票）
-      </button>
       <button id="stopSpam" class="secondary" disabled>
         <i class="fas fa-stop"></i> 送信停止
       </button>
@@ -708,7 +665,6 @@
 
   <script src="script.js"></script>
   <script>
-    // ファイル選択のUI改善
     document.getElementById('messageFile').addEventListener('change', function(e) {
       const fileName = this.files[0] ? this.files[0].name : 'ファイルが選択されていません';
       const label = document.getElementById('fileInputLabel');
@@ -725,7 +681,6 @@
       }
     });
 
-    // 言語オプションのUI改善
     const languageOptions = document.querySelectorAll('.language-option');
     languageOptions.forEach(option => {
       option.addEventListener('click', function(e) {
@@ -739,7 +694,6 @@
       });
     });
 
-    // メッセージ入力オプションの切り替え
     const messageOptionBtns = document.querySelectorAll('.message-option-btn');
     const fileInputContainer = document.getElementById('fileInputContainer');
     const textInputContainer = document.getElementById('textInputContainer');
@@ -748,11 +702,9 @@
       btn.addEventListener('click', function() {
         const option = this.getAttribute('data-option');
         
-        // ボタンのアクティブ状態を更新
         messageOptionBtns.forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         
-        // コンテナの表示を切り替え
         fileInputContainer.classList.remove('active');
         textInputContainer.classList.remove('active');
         
@@ -762,7 +714,6 @@
           textInputContainer.classList.add('active');
         }
         
-        // フォームのバリデーションを更新
         checkFormValidity();
       });
     });
