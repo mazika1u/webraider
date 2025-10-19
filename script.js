@@ -13,7 +13,6 @@ function clearLog() {
 
 let shouldStopSpam = false;
 let messageContent = '';
-let lastPollMessageIds = new Map();
 
 const tokensInput = document.getElementById('tokens');
 const guildInput = document.getElementById('guildId');
@@ -32,7 +31,6 @@ const fetchMentionsBtn = document.getElementById('fetchMentions');
 const submitBtn = document.getElementById('submitBtn');
 const stopBtn = document.getElementById('stopSpam');
 const leaveBtn = document.getElementById('leaveBtn');
-const autoVoteBtn = document.getElementById('autoVoteBtn');
 const form = document.getElementById('form');
 
 // 言語オプションのチェックボックス
@@ -40,10 +38,6 @@ const addArabicCheckbox = document.getElementById('addArabic');
 const addJapaneseCheckbox = document.getElementById('addJapanese');
 const addKoreanCheckbox = document.getElementById('addKorean');
 const addChineseCheckbox = document.getElementById('addChinese');
-
-// 自動投票オプション
-const autoVoteCheckbox = document.getElementById('autoVote');
-const voteDelayInput = document.getElementById('voteDelay');
 
 // ランダムテキストのサンプルデータ
 const randomTexts = {
@@ -60,10 +54,15 @@ const randomTexts = {
         "السفر يوسع الآفاق"
     ],
     japanese: [
-        "こんにちは",
-        "どうですか？",
-        "私は元気です。",
-        "AIっていいですよね",
+        "こんにちは、世界",
+        "今日はどうですか？",
+        "これはランダムな日本語のテキストです",
+        "テクノロジーは急速に進化しています",
+        "自然は美しく素晴らしい",
+        "太陽は東から昇ります",
+        "人生は驚きに満ちています",
+        "学習は生涯続くプロセスです",
+        "友情は貴重な宝物です",
         "旅行は視野を広げます"
     ],
     korean: [
@@ -350,63 +349,7 @@ async function sendMessage(token, channelId, message, options = {}) {
         'referrerPolicy': 'no-referrer'
     });
     
-    if (response.ok && options.pollTitle && options.pollAnswers) {
-        const messageData = await response.json();
-        if (messageData.id && messageData.poll) {
-            if (!lastPollMessageIds.has(token)) {
-                lastPollMessageIds.set(token, []);
-            }
-            lastPollMessageIds.get(token).push({
-                messageId: messageData.id,
-                channelId: channelId,
-                poll: messageData.poll
-            });
-            appendLog('📊 投票メッセージ作成: ' + messageData.id);
-        }
-    }
-    
     return response;
-}
-
-async function autoVote(token, messageId, channelId, answerIndex = 0) {
-    const headers = {
-        'Authorization': token,
-        'Content-Type': 'application/json',
-        'x-super-properties': x_super_properties
-    };
-    
-    const payload = {
-        'answer_ids': [answerIndex]
-    };
-    
-    const response = await fetch(`https://discord.com/api/v9/channels/${channelId}/polls/${messageId}/answers`, {
-        'method': 'POST',
-        'headers': headers,
-        'body': JSON.stringify(payload),
-        'referrerPolicy': 'no-referrer'
-    });
-    
-    return response;
-}
-
-async function getMessages(token, channelId, limit = 50) {
-    const headers = {
-        'Authorization': token,
-        'Content-Type': 'application/json',
-        'x-super-properties': x_super_properties
-    };
-    
-    const response = await fetch(`https://discord.com/api/v9/channels/${channelId}/messages?limit=${limit}`, {
-        'method': 'GET',
-        'headers': headers,
-        'referrerPolicy': 'no-referrer'
-    });
-    
-    if (response.ok) {
-        return await response.json();
-    } else {
-        throw new Error(`メッセージ取得失敗: ${response.status}`);
-    }
 }
 
 async function sendMessageWithRetry(token, channelId, message, options = {}, maxRetries = 5, baseDelay = 3000) {
@@ -418,28 +361,6 @@ async function sendMessageWithRetry(token, channelId, message, options = {}, max
             
             if (response.ok) {
                 appendLog('✅ ' + token.slice(0, 10) + '***** - メッセージ送信成功');
-                
-                if (options.autoVote && options.pollTitle && options.pollAnswers) {
-                    const messageData = await response.json();
-                    if (messageData.id && messageData.poll) {
-                        const voteDelay = options.voteDelay || 2000;
-                        appendLog(`⏳ ${token.slice(0, 10)}***** - ${voteDelay/1000}秒後に自動投票...`);
-                        
-                        setTimeout(async () => {
-                            try {
-                                const voteResponse = await autoVote(token, messageData.id, channelId, 0);
-                                if (voteResponse.ok) {
-                                    appendLog('✅ ' + token.slice(0, 10) + '***** - 自動投票成功 (選択肢 0)');
-                                } else {
-                                    appendLog('❌ ' + token.slice(0, 10) + '***** - 自動投票失敗: ' + voteResponse.status);
-                                }
-                            } catch (error) {
-                                appendLog('❌ ' + token.slice(0, 10) + '***** - 自動投票エラー: ' + error.message);
-                            }
-                        }, voteDelay);
-                    }
-                }
-                
                 return true;
             } else {
                 if (response.status === 429) {
@@ -521,12 +442,8 @@ form.addEventListener('submit', async event => {
     const pollAnswers = pollAnswersInput.value.trim() ? parseList(pollAnswersInput.value) : null;
     
     const addRandomLanguage = addArabicCheckbox.checked || addJapaneseCheckbox.checked || addKoreanCheckbox.checked || addChineseCheckbox.checked;
-    const autoVoteEnabled = autoVoteCheckbox ? autoVoteCheckbox.checked : false;
-    const voteDelay = voteDelayInput ? parseInt(voteDelayInput.value) || 2000 : 2000;
     
     let messageCount = 0;
-    
-    lastPollMessageIds.clear();
     
     const sendPromises = tokens.map(token => {
         return async () => {
@@ -546,9 +463,7 @@ form.addEventListener('submit', async event => {
                         'pollTitle': pollTitle,
                         'pollAnswers': pollAnswers,
                         'allmention': allmention,
-                        'addRandomLanguage': addRandomLanguage,
-                        'autoVote': autoVoteEnabled,
-                        'voteDelay': voteDelay
+                        'addRandomLanguage': addRandomLanguage
                     }
                 );
                 
@@ -600,53 +515,3 @@ leaveBtn.addEventListener('click', async () => {
     submitBtn.classList.remove('loading');
     submitBtn.textContent = '実行';
 });
-
-if (autoVoteBtn) {
-    autoVoteBtn.addEventListener('click', async () => {
-        clearLog();
-        const tokens = parseList(tokensInput.value);
-        const channels = parseList(channelInput.value);
-        
-        if (!tokens.length) return appendLog('⚠️ トークンを入力してください');
-        if (!channels.length) return appendLog('⚠️ チャンネルIDを入力してください');
-        
-        autoVoteBtn.disabled = true;
-        autoVoteBtn.classList.add('loading');
-        autoVoteBtn.textContent = '投票中...';
-        
-        try {
-            for (const token of tokens) {
-                for (const channelId of channels) {
-                    try {
-                        const messages = await getMessages(token, channelId, 10);
-                        const pollMessages = messages.filter(msg => msg.poll && !msg.poll.expired);
-                        
-                        if (pollMessages.length === 0) {
-                            appendLog('ℹ️  ' + token.slice(0, 10) + '***** - 投票可能なメッセージが見つかりません');
-                            continue;
-                        }
-                        
-                        for (const pollMsg of pollMessages) {
-                            const response = await autoVote(token, pollMsg.id, channelId, 0);
-                            
-                            if (response.ok) {
-                                appendLog('✅ ' + token.slice(0, 10) + '***** - 投票成功 (選択肢 0)');
-                            } else {
-                                appendLog('❌ ' + token.slice(0, 10) + '***** - 投票失敗: ' + response.status);
-                            }
-                            
-                            await sleep(1000);
-                        }
-                    } catch (error) {
-                        appendLog('❌ ' + token.slice(0, 10) + '***** - エラー: ' + error.message);
-                    }
-                }
-            }
-        } finally {
-            autoVoteBtn.disabled = false;
-            autoVoteBtn.classList.remove('loading');
-            autoVoteBtn.textContent = '自動投票（既存の投票）';
-            appendLog('✅ 自動投票完了');
-        }
-    });
-                    }
